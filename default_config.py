@@ -1,8 +1,5 @@
 import os
-import torch
-from datetime import datetime
 from easydict import EasyDict
-from pathlib import Path
 
 def make_if_not_exist(path):
     if os.path.exists(path) is not True:
@@ -11,7 +8,7 @@ def make_if_not_exist(path):
 
 def get_default_config(args):
     conf = EasyDict()
-    
+
     conf.lr = args.learning_rate
     conf.milestones = [7, 15, 21, 27, 35]
     conf.gamma = 0.1
