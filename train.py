@@ -1,6 +1,8 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+import pathlib
+import shutil
 import os
 import argparse
 import torch
@@ -23,6 +25,8 @@ class Trainer:
         self.data_loaders, self.data_sizes, self.classids_labels = get_data_loaders(
             conf
         )
+        self.model_path = conf.model_path
+        self.metrics_path = os.path.join(self.model_path, "metrics.json")
 
     def train(self):
         self._init_model_param()
@@ -112,7 +116,7 @@ class Trainer:
 
                 if validation_acc >= best_acc and test_acc >= best_acc_test:
                     best_model_path = os.path.join(
-                        self.conf.model_path, self.conf.job_name + "_best_model.pth"
+                        self.conf.model_path, "model.pth"
                     )
                     torch.save(self.model.state_dict(), best_model_path)
                     best_acc = validation_acc
@@ -133,9 +137,20 @@ class Trainer:
             plt.ylim([0, 1.1])
             plt.legend(loc="lower right")
             plt.savefig(
-                os.path.join(self.conf.model_path, f"Accuracy_{self.conf.job_name}.png")
+                os.path.join(self.conf.model_path, f"graph.png")
             )
             plt.close()
+
+            with open(self.metrics_path, "w") as fp:
+                json.dump(
+                    {
+                        "train_acc": train_acc_hist,
+                        "val_acc": val_acc_hist,
+                        "test_acc": test_acc_hist,
+                    },
+                    fp,
+                )
+
         with open(os.path.join(self.conf.model_path, "class_names.json"), "w") as fp:
             json.dump(self.classids_labels, fp)
 
@@ -248,6 +263,9 @@ def parse_args():
     )
     parser.add_argument(
         "--job_name", type=str, default="resnet18", help="The name of experiment"
+    )
+    parser.add_argument(
+        "--model_path", type=str, default="out_snapshot", help="Path model"
     )
     # parser.add_argument('-d', "--device_ids", type=str, default="1", help="Which gpu id: 0,1,2,3")
     args = parser.parse_args()

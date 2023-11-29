@@ -24,8 +24,10 @@ def get_default_config(args):
     conf.save_every = 50
     conf.path_pretrain = args.path_pretrain
     conf.job_name = args.job_name
-    conf.model_path = os.path.join( "out_snapshot", conf.job_name)
+    conf.model_path = args.model_path
     make_if_not_exist(conf.model_path)
+    # Set 777 permission to model_path
+    os.chmod(conf.model_path, 0o777)
 
     return conf
 
