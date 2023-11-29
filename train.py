@@ -1,8 +1,10 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 import os
 import argparse
 import torch
 import json
-import torch.nn as nn
 from tqdm import tqdm
 from torch import optim
 from torch.nn import CrossEntropyLoss, Linear, Sequential
@@ -55,7 +57,7 @@ class Trainer:
             self.model.train()
             training_loss = 0.0
             training_corrects = 0
-            for images, labels in tqdm(iter(self.data_loaders["train"])):
+            for images, labels in iter(self.data_loaders["train"]):
                 images = images.cuda()
                 labels = labels.cuda()
                 self.optimizer.zero_grad()
@@ -70,6 +72,10 @@ class Trainer:
                 self.optimizer.step()
                 # tensorboard
                 self.steps["train"] += 1
+                print(
+                    "Epoch: {}/{}... ".format(e + 1, self.conf.epochs),
+                    "Loss: {:.4f}".format(loss.item()),
+                )
             training_acc = float(training_corrects.double() / self.data_sizes["train"])
             train_acc_hist.append(training_acc)
 
@@ -80,7 +86,7 @@ class Trainer:
             with torch.no_grad():
                 validation_loss = 0.0
                 validation_corrects = 0
-                for images, labels in tqdm(iter(self.data_loaders["val"])):
+                for images, labels in iter(self.data_loaders["val"]):
                     self.steps["val"] += 1
                     images = images.cuda()
                     labels = labels.cuda()
@@ -95,7 +101,7 @@ class Trainer:
                 val_acc_hist.append(validation_acc)
 
                 test_corrects = 0
-                for images, labels in tqdm(iter(self.data_loaders["test"])):
+                for images, labels in iter(self.data_loaders["test"]):
                     images = images.cuda()
                     labels = labels.cuda()
                     outputs = self.model.forward(images)
@@ -111,6 +117,13 @@ class Trainer:
                     torch.save(self.model.state_dict(), best_model_path)
                     best_acc = validation_acc
                     best_acc_test = test_acc
+
+                print(
+                    "Epoch: {}/{}... ".format(e + 1, self.conf.epochs),
+                    "Validation Loss: {:.4f}".format(validation_loss),
+                    "Validation Acc: {:.4f}".format(validation_acc),
+                    "Test Acc: {:.4f}".format(test_acc),
+                )
 
             plt.figure(figsize=(9.6, 6.4))
             plt.plot(counter, train_acc_hist, label="Training", linestyle="-")

@@ -8,7 +8,8 @@ ENV PYTHONPATH=/workspace
 COPY requirements.txt /requirements.txt
 RUN python -m pip install --upgrade pip && python -m pip install -r /requirements.txt
 
-COPY . /workspace
-WORKDIR /workspace
+COPY ./pretrains /workspace/
+COPY *.py /workspace/
+COPY *.sh /workspace/
 
 CMD ["bash"]
