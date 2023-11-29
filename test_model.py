@@ -1,4 +1,3 @@
-import os, sys
 import numpy as np
 import cv2
 from scipy.special import softmax
