@@ -279,3 +279,9 @@ if __name__ == "__main__":
     trainer = Trainer(conf)
     trainer.train()
     print("Done!")
+
+    # Run model convert to onnx
+    # python export_onnx.py --network resnet18 --num_classes 2 --input_size 224 --path_model out_snapshot/resnet18/resnet18_best_model.pth
+    os.system(
+        f"python export_onnx.py --network {conf.net} --num_classes {conf.nb_classes} --input_size {conf.input_size} --path_model {conf.model_path}/model.pth"
+    )
